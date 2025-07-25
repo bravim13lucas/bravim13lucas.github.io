@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Contatos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    form {
+      margin-bottom: 20px;
+      max-width: 500px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 500px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cadastro de Contatos</h1>
+  <!-- Formulário de cadastro -->
+  <form id="cadastroForm">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
+
+    <label for="telefone">Telefone:</label>
+    <input type="text" id="telefone" name="telefone" required>
+
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <h2>Lista de Contatos</h2>
+  <!-- Tabela para exibir os contatos -->
+  <table id="tabelaContatos">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Telefone</th>
+      </tr>
+    </thead>
+    <tbody id="corpoTabela"></tbody>
+  </table>
+
+  <script>
+    // Substitua este valor pelo URL do seu Apps Script implantado (passo 4 do README).
+    const APPS_SCRIPT_URL = 'INSIRA_AQUI_A_URL_DO_APPS_SCRIPT';
+
+    /**
+     * Busca a lista completa de contatos no Apps Script e atualiza a tabela.
+     */
+    async function listarContatos() {
+      try {
+        const response = await fetch(APPS_SCRIPT_URL);
+        // A resposta deve ser uma string JSON representando um array de objetos
+        const data = await response.json();
+        const corpoTabela = document.getElementById('corpoTabela');
+        corpoTabela.innerHTML = '';
+        data.forEach(item => {
+          const row = document.createElement('tr');
+          const nomeCell = document.createElement('td');
+          nomeCell.textContent = item.nome;
+          const telefoneCell = document.createElement('td');
+          telefoneCell.textContent = item.telefone;
+          row.appendChild(nomeCell);
+          row.appendChild(telefoneCell);
+          corpoTabela.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Erro ao listar contatos:', error);
+      }
+    }
+
+    /**
+     * Envia um novo contato ao Apps Script. Após o envio, recarrega a lista de contatos.
+     * @param {string} nome
+     * @param {string} telefone
+     */
+    async function adicionarContato(nome, telefone) {
+      try {
+        const payload = { nome, telefone };
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        // Após adicionar, atualiza a lista
+        listarContatos();
+      } catch (error) {
+        console.error('Erro ao adicionar contato:', error);
+      }
+    }
+
+    // Tratador de envio do formulário
+    document.getElementById('cadastroForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const nome = document.getElementById('nome').value;
+      const telefone = document.getElementById('telefone').value;
+      // Chama a função para adicionar o contato
+      adicionarContato(nome, telefone);
+      // Limpa o formulário
+      document.getElementById('cadastroForm').reset();
+    });
+
+    // Carrega a lista de contatos quando a página é aberta
+    listarContatos();
+  </script>
+</body>
+</html>
